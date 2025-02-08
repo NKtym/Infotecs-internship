@@ -4,26 +4,9 @@
 #include <dlfcn.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include "../Lib/lib.hpp"
 
 #define SOCKET_PATH "/tmp/socket"
-
-typedef bool (*CheckFunc)(const std::string&);
-
-CheckFunc strCheck;
-
-void load_library() {
-    void* handle = dlopen("../Lib/libmylib.so", RTLD_LAZY);
-    if (!handle) {
-        std::cerr << "Ошибка загрузки библиотеки\n";
-        exit(1);
-    }
-    strCheck = (CheckFunc)dlsym(handle, "strCheck");
-    if (!strCheck) {
-        std::cerr << "Ошибка загрузки функций\n";
-        dlclose(handle);
-        exit(1);
-    }
-}
 
 class Program2 {
 private:
@@ -79,7 +62,6 @@ public:
 };
 
 int main() {
-    load_library();
     Program2 program2;
     program2.start();
     return 0;

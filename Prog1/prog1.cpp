@@ -7,29 +7,9 @@
 #include <dlfcn.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include "../Lib/lib.hpp"
 
 #define SOCKET_PATH "/tmp/socket"
-
-typedef void (*SortFunc)(std::string&);
-typedef int (*SumFunc)(const std::string&);
-
-SortFunc descendSortAndReplacement;
-SumFunc sumNum;
-
-void load_library() {
-    void* handle = dlopen("../Lib/libmylib.so", RTLD_LAZY);
-    if (!handle) {
-        std::cerr << "Ошибка загрузки библиотеки\n";
-        exit(1);
-    }
-    descendSortAndReplacement = (SortFunc)dlsym(handle, "descendSortAndReplacement");
-    sumNum = (SumFunc)dlsym(handle, "sumNum");
-    if (!descendSortAndReplacement || !sumNum) {
-        std::cerr << "Ошибка загрузки функций\n";
-        dlclose(handle);
-        exit(1);
-    }
-}
 
 class Prog1 {
 private:
@@ -118,7 +98,6 @@ void thr2(){
 };
 
 int main() {
-    load_library();
     Prog1 prog1;
     std::thread t1(&Prog1::thr1, &prog1);
     std::thread t2(&Prog1::thr2, &prog1);

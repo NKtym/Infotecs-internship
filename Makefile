@@ -1,22 +1,41 @@
-LIB_DIR := Lib
-PROG1_DIR := Prog1
-PROG2_DIR := Prog2
-LIB_NAME := lib.so
+CC = g++
+CFLAGS = -std=c++20 -Wall -Wextra -pthread
+LIB_DIR = ./Lib
+PROG1_DIR = ./Prog1
+PROG2_DIR = ./Prog2
+LIB_SRC = $(LIB_DIR)/lib.cpp
+LIB_OBJ = $(LIB_SRC:.cpp=.o)
+PROG1_SRC = $(PROG1_DIR)/prog1.cpp
+PROG2_SRC = $(PROG2_DIR)/prog2.cpp
+PROG1_OBJ = $(PROG1_SRC:.cpp=.o)
+PROG2_OBJ = $(PROG2_SRC:.cpp=.o)
+SOCKET_LIB = -ldl
 
-CC := g++
-CFLAGS := -std=c++17 -Wall -Wextra -fPIC -shared
-LDFLAGS := -ldl
+LIB_OUTPUT = $(LIB_DIR)/lib.a
+PROG1_OUTPUT = $(PROG1_DIR)/prog1
+PROG2_OUTPUT = $(PROG2_DIR)/prog2
 
-all: lib prog1 prog2
+all: $(PROG1_OUTPUT) $(PROG2_OUTPUT)
 
-lib:
-	$(CC) $(CFLAGS) -o $(LIB_DIR)/$(LIB_NAME) $(LIB_DIR)/*.cpp
+$(PROG1_OUTPUT): $(PROG1_OBJ) $(LIB_OUTPUT)
+	$(CC) $(CFLAGS) -o $@ $^ $(SOCKET_LIB)
 
-prog1: lib
-	$(CC) -o $(PROG1_DIR)/prog1 $(PROG1_DIR)/*.cpp -ldl -rdynamic
+$(PROG2_OUTPUT): $(PROG2_OBJ) $(LIB_OUTPUT)
+	$(CC) $(CFLAGS) -o $@ $^ $(SOCKET_LIB)
 
-prog2: lib
-	$(CC) -o $(PROG2_DIR)/prog2 $(PROG2_DIR)/*.cpp -ldl -rdynamic
+$(LIB_OUTPUT): $(LIB_OBJ)
+	ar rcs $@ $^
+
+$(PROG1_OBJ): $(PROG1_SRC)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(PROG2_OBJ): $(PROG2_SRC)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(LIB_OBJ): $(LIB_SRC)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(LIB_DIR)/$(LIB_NAME) $(PROG1_DIR)/prog1 $(PROG2_DIR)/prog2
+	rm -f $(PROG1_OBJ) $(PROG2_OBJ) $(LIB_OBJ) $(PROG1_OUTPUT) $(PROG2_OUTPUT) $(LIB_OUTPUT)
+
+.PHONY: all clean
