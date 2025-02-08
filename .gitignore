@@ -1,0 +1,7 @@
+/Prog1/*.o
+/Prog2/*.o
+/Lib/*.o
+/Lib/*.a
+.vscode
+prog1
+prog2
